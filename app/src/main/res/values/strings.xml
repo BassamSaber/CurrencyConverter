@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Convert Currency</string>
+    <string name="str_swap_desc">Swap the from and to currency and there values</string>
+    <string name="str_from">from</string>
+    <string name="str_to">to</string>
+    <string name="details">Details</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="try_again">Try Again</string>
+    <string name="str_error">Error</string>
+    <string name="str_ok">Ok</string>
 </resources>
