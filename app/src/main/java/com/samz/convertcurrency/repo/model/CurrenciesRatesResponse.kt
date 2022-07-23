@@ -9,7 +9,6 @@ data class CurrenciesRatesResponse(
     @SerializedName("base") val base: String,
     @SerializedName("date") val date: String,
     @SerializedName("rates") val rates: Map<String, Double>,
-    @SerializedName("timestamp") val timestamp: String,
-    @SerializedName("success") val success: Boolean,
-)
+    @SerializedName("timestamp") val timestamp: String
+) : GeneralResponse()
 

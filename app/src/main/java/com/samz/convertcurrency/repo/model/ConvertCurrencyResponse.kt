@@ -10,8 +10,7 @@ data class ConvertCurrencyResponse(
     @SerializedName("info") val info: ConvertInfo,
     @SerializedName("query") val query: ConvertQuery,
     @SerializedName("result") val result: Double,
-    @SerializedName("success") val success: Boolean
-) {
+) : GeneralResponse() {
     val amount: Double
         get() = query.amount
     val rate: Double
