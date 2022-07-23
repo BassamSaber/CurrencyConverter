@@ -1,9 +1,7 @@
 package com.samz.convertcurrency.ui.screens.details
 
-import android.content.Context
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
-import androidx.lifecycle.LifecycleOwner
 import com.samz.convertcurrency.R
 import com.samz.convertcurrency.model.ConvertedCurrencies
 import com.samz.convertcurrency.model.generalResponse.Resources
@@ -12,6 +10,7 @@ import com.samz.convertcurrency.ui.base.BaseViewModel
 import com.samz.convertcurrency.ui.base.adapter.BaseAdapter
 import com.samz.convertcurrency.utils.Constants
 import com.samz.convertcurrency.utils.Coroutines
+import com.samz.convertcurrency.utils.ResourcesUtils
 import com.samz.convertcurrency.utils.Utilities
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.*
@@ -19,7 +18,10 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class DetailsViewModel @Inject constructor(private val appRepo: RepoInterface) : BaseViewModel() {
+class DetailsViewModel @Inject constructor(
+    private val appRepo: RepoInterface,
+    private val resUtils: ResourcesUtils
+) : BaseViewModel() {
     val isHistoryLoading = ObservableBoolean(false)
     val isRatesLoading = ObservableBoolean(false)
 
@@ -35,8 +37,8 @@ class DetailsViewModel @Inject constructor(private val appRepo: RepoInterface) :
     private val historyList = ArrayList<HistoryGroupIVM>()
     val historyAdapter = BaseAdapter(historyList, null)
 
-    override fun onViewCreated(context: Context, lifecycleOwner: LifecycleOwner) {
-        super.onViewCreated(context, lifecycleOwner)
+    override fun onViewCreated() {
+        super.onViewCreated()
         initViewData()
     }
 
@@ -62,31 +64,35 @@ class DetailsViewModel @Inject constructor(private val appRepo: RepoInterface) :
         val fromDate = Calendar.getInstance().apply { add(Calendar.DATE, -1) }.time
         val toDate = Calendar.getInstance().apply { add(Calendar.DATE, -3) }.time
         isHistoryLoading.set(true)
-        appRepo.fetchConversionHistory(Utilities.formatDate(fromDate), Utilities.formatDate(toDate))
-            .observe(lifecycleOwner) { response ->
-                isHistoryLoading.set(false)
-                if (response.status == Resources.DataStatus.SUCCESS) {
-                    val list = response.data
-                    if (!list.isNullOrEmpty()) {
-                        updatePieChartData(list)
+        Coroutines.call({
+            appRepo.fetchConversionHistory(
+                Utilities.formatDate(fromDate),
+                Utilities.formatDate(toDate)
+            )
+        }, { response ->
+            isHistoryLoading.set(false)
+            if (response.status == Resources.DataStatus.SUCCESS) {
+                val list = response.data
+                if (!list.isNullOrEmpty()) {
+                    updatePieChartData(list)
 
-                        val groupedList = list.groupBy { it.date }
-                        historyList.clear()
-                        for (key in groupedList.keys)
-                            historyList.add(
-                                HistoryGroupIVM(
-                                    Utilities.formatDate(key),
-                                    groupedList[key] ?: ArrayList()
-                                )
+                    val groupedList = list.groupBy { it.date }
+                    historyList.clear()
+                    for (key in groupedList.keys)
+                        historyList.add(
+                            HistoryGroupIVM(
+                                Utilities.formatDate(key),
+                                groupedList[key] ?: ArrayList()
                             )
-                        historyAdapter.notifyDataSetChanged()
-                    }
-                } else if (response.status == Resources.DataStatus.ERROR) {
-                    historyErrorMsg.set(
-                        response.error?.message ?: getString(R.string.something_went_wrong)
-                    )
+                        )
+                    historyAdapter.notifyDataSetChanged()
                 }
+            } else if (response.status == Resources.DataStatus.ERROR) {
+                historyErrorMsg.set(
+                    response.error?.message ?: getString(R.string.something_went_wrong)
+                )
             }
+        })
 
     }
 
@@ -100,7 +106,7 @@ class DetailsViewModel @Inject constructor(private val appRepo: RepoInterface) :
 
         fromAmountWithCurrency.set("$amount $baseCurrency")
         isRatesLoading.set(true)
-        getTopCurrenciesRates(baseCurrency).observe(lifecycleOwner) { response ->
+        Coroutines.call({ appRepo.convertAmountToPopularCurrencies(baseCurrency) }, { response ->
             isRatesLoading.set(false)
             if (response.status == Resources.DataStatus.SUCCESS) {
                 ratesList.clear()
@@ -117,9 +123,9 @@ class DetailsViewModel @Inject constructor(private val appRepo: RepoInterface) :
                     response.error?.message ?: getString(R.string.something_went_wrong)
                 )
             }
-        }
+        })
     }
 
-    private fun getTopCurrenciesRates(baseCurrency: String) =
-        Coroutines.call { appRepo.convertAmountToPopularCurrencies(baseCurrency) }
+    private fun getString(resId: Int): String = resUtils.getString(resId)
+//    private fun showErrorDialog(errorMsg:String?) = resUtils.showErrorDialog(errorMsg)
 }

@@ -5,7 +5,6 @@ import com.samz.convertcurrency.model.ConvertedCurrencies
 import com.samz.convertcurrency.model.CurrenciesRatesResponse
 import com.samz.convertcurrency.remote.APIInterface
 import com.samz.convertcurrency.remote.SafeApiCall
-import com.samz.convertcurrency.utils.Coroutines
 import javax.inject.Inject
 
 /**
@@ -65,13 +64,13 @@ class AppRepo @Inject constructor(
         return invokeRequest { apiClient.getCurrenciesRates(baseCurrency, symbols) }
     }
 
-    override fun newCurrenciesConversion(convertedCurrencies: ConvertedCurrencies) =
-        Coroutines.call { databaseHelper.newCurrencyConversion(convertedCurrencies) }
+    override suspend fun newCurrenciesConversion(convertedCurrencies: ConvertedCurrencies) =
+        databaseHelper.newCurrencyConversion(convertedCurrencies)
 
-    override fun fetchConversionHistory(fromDate: String, toDate: String) =
-        Coroutines.call { databaseHelper.fetchConversionHistoryBetweenDates(fromDate, toDate) }
+    override suspend fun fetchConversionHistory(fromDate: String, toDate: String) =
+        databaseHelper.fetchConversionHistoryBetweenDates(fromDate, toDate)
 
-    override fun deleteOldConversions(oldDate: String) =
-        Coroutines.call { databaseHelper.deleteOlderHistory(oldDate) }
+    override suspend fun deleteOldConversions(oldDate: String) =
+        databaseHelper.deleteOlderHistory(oldDate)
 
 }

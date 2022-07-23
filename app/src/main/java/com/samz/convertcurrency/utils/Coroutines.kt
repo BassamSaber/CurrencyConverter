@@ -1,5 +1,6 @@
 package com.samz.convertcurrency.utils
 
+import com.samz.convertcurrency.model.generalResponse.Resources
 import com.samz.convertcurrency.model.generalResponse.ResourcesLiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +28,25 @@ object Coroutines {
             }
         }
         return data
+    }
+
+    fun <T> call(work: suspend () -> T, callback: (Resources<T>) -> Unit) {
+        val data: Resources<T> = Resources()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = work.invoke()
+                withContext(Dispatchers.Main) {
+                    data.success(response)
+                }
+            } catch (error: ApiException) {
+                data.error(error)
+            } catch (error: NoInternetException) {
+                data.error(error)
+            } catch (error: Exception) {
+                data.error(error)
+            }
+            callback(data)
+        }
     }
 
 }

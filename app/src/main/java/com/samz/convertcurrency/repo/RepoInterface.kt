@@ -4,7 +4,6 @@ import com.samz.convertcurrency.model.ConvertCurrencyResponse
 import com.samz.convertcurrency.model.ConvertedCurrencies
 import com.samz.convertcurrency.model.CurrenciesRatesResponse
 import com.samz.convertcurrency.model.SymbolResponse
-import com.samz.convertcurrency.model.generalResponse.ResourcesLiveData
 
 interface RepoInterface {
     suspend fun getCurrencySymbols(): SymbolResponse?
@@ -17,12 +16,12 @@ interface RepoInterface {
 
     suspend fun convertAmountToPopularCurrencies(baseCurrency: String): CurrenciesRatesResponse?
 
-    fun newCurrenciesConversion(convertedCurrencies: ConvertedCurrencies): ResourcesLiveData<Unit>
+    suspend fun newCurrenciesConversion(convertedCurrencies: ConvertedCurrencies): Unit
 
-    fun fetchConversionHistory(
+    suspend fun fetchConversionHistory(
         fromDate: String,
         toDate: String
-    ): ResourcesLiveData<List<ConvertedCurrencies>>
+    ): List<ConvertedCurrencies>
 
-    fun deleteOldConversions(oldDate: String): ResourcesLiveData<Unit>
+    suspend fun deleteOldConversions(oldDate: String): Unit
 }

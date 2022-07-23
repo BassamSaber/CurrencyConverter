@@ -1,13 +1,11 @@
 package com.samz.convertcurrency.ui.screens.home
 
-import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import androidx.databinding.ObservableArrayList
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import androidx.databinding.ObservableInt
-import androidx.lifecycle.LifecycleOwner
 import com.samz.convertcurrency.R
 import com.samz.convertcurrency.model.ConvertedCurrencies
 import com.samz.convertcurrency.model.generalResponse.Resources
@@ -19,7 +17,10 @@ import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(private val appRepo: RepoInterface) : BaseViewModel() {
+class HomeViewModel @Inject constructor(
+    private val appRepo: RepoInterface,
+    private val resUtils: ResourcesUtils
+) : BaseViewModel() {
 
     val isLoading = ObservableBoolean(false)
     val isNetworkError = ObservableBoolean(false)
@@ -54,27 +55,29 @@ class HomeViewModel @Inject constructor(private val appRepo: RepoInterface) : Ba
         }
     }
 
-    override fun onViewCreated(context: Context, lifecycleOwner: LifecycleOwner) {
-        super.onViewCreated(context, lifecycleOwner)
+    override fun onViewCreated() {
+        super.onViewCreated()
         initCurrenciesSymbols()
 
         clearOldConversion()
     }
 
     private fun clearOldConversion() {
-        appRepo.deleteOldConversions(
-            Utilities.formatDate(
-                Calendar.getInstance().apply { add(Calendar.DATE, -3) }.time
+        Coroutines.call({
+            appRepo.deleteOldConversions(
+                Utilities.formatDate(
+                    Calendar.getInstance().apply { add(Calendar.DATE, -3) }.time
+                )
             )
-        ).observe(lifecycleOwner) { response ->
+        }, { response ->
             if (response.status == Resources.DataStatus.ERROR)
                 showErrorDialog(response.error?.message)
-        }
+        })
     }
 
     fun initCurrenciesSymbols() {
         isLoading.set(true)
-        getCurrencySymbols().observe(lifecycleOwner) { response ->
+        Coroutines.call({ appRepo.getCurrencySymbols() }, { response ->
             isLoading.set(false)
             if (response.status == Resources.DataStatus.SUCCESS) {
                 errorMsg.set("")
@@ -89,7 +92,7 @@ class HomeViewModel @Inject constructor(private val appRepo: RepoInterface) : Ba
                 errorMsg.set(response.error?.message ?: "Error")
                 isNetworkError.set(response.error is NoInternetException)
             }
-        }
+        })
     }
 
     private fun convertCurrencyAmount() {
@@ -101,11 +104,13 @@ class HomeViewModel @Inject constructor(private val appRepo: RepoInterface) : Ba
             setConversionResult((amount * rate))
         } else {
             isConvertLoading.set(true)
-            convertCurrencyAmount(
-                amount,
-                currencySymbolsFromList[fromSelectedCurrency.get()],
-                currencySymbolsToList[toSelectedCurrency.get()]
-            ).observe(lifecycleOwner) { response ->
+            Coroutines.call({
+                appRepo.convertCurrencyAmount(
+                    amount,
+                    currencySymbolsFromList[fromSelectedCurrency.get()],
+                    currencySymbolsToList[toSelectedCurrency.get()]
+                )
+            }, { response ->
                 isConvertLoading.set(false)
                 if (response.status == Resources.DataStatus.SUCCESS) {
                     rate = response.data?.rate ?: 0.0
@@ -119,7 +124,7 @@ class HomeViewModel @Inject constructor(private val appRepo: RepoInterface) : Ba
                 } else if (response.status == Resources.DataStatus.ERROR) {
                     showErrorDialog(response.error?.message)
                 }
-            }
+            })
         }
     }
 
@@ -128,13 +133,15 @@ class HomeViewModel @Inject constructor(private val appRepo: RepoInterface) : Ba
     }
 
     private fun saveCurrenciesConversion() {
-        appRepo.newCurrenciesConversion(
-            ConvertedCurrencies(
-                currencySymbolsFromList[fromSelectedCurrency.get()],
-                currencySymbolsToList[toSelectedCurrency.get()],
-                Calendar.getInstance().time
+        Coroutines.call({
+            appRepo.newCurrenciesConversion(
+                ConvertedCurrencies(
+                    currencySymbolsFromList[fromSelectedCurrency.get()],
+                    currencySymbolsToList[toSelectedCurrency.get()],
+                    Calendar.getInstance().time
+                )
             )
-        )
+        }, {})
     }
 
     fun swapFromToCurrencies() {
@@ -154,10 +161,6 @@ class HomeViewModel @Inject constructor(private val appRepo: RepoInterface) : Ba
         convertCurrencyAmount()
     }
 
-    private fun getCurrencySymbols() = Coroutines.call { appRepo.getCurrencySymbols() }
-    private fun convertCurrencyAmount(amount: Double, fromCurrency: String, toCurrency: String) =
-        Coroutines.call { appRepo.convertCurrencyAmount(amount, fromCurrency, toCurrency) }
-
     fun getDetailsNavData(): Bundle {
         val bundle = Bundle()
         if (fromSelectedCurrency.get() != 0) {
@@ -173,4 +176,7 @@ class HomeViewModel @Inject constructor(private val appRepo: RepoInterface) : Ba
 
         return bundle
     }
+
+    private fun getString(resId: Int): String = resUtils.getString(resId)
+    private fun showErrorDialog(errorMsg: String?) = resUtils.showErrorDialog(errorMsg)
 }
