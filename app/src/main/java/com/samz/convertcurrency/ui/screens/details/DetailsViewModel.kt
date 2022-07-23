@@ -2,8 +2,10 @@ package com.samz.convertcurrency.ui.screens.details
 
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
+import androidx.lifecycle.MutableLiveData
 import com.samz.convertcurrency.R
 import com.samz.convertcurrency.model.ConvertedCurrencies
+import com.samz.convertcurrency.model.CurrenciesRatesResponse
 import com.samz.convertcurrency.model.generalResponse.Resources
 import com.samz.convertcurrency.repo.RepoInterface
 import com.samz.convertcurrency.ui.base.BaseViewModel
@@ -18,7 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DetailsViewModel @Inject constructor(
-    private val appRepo: RepoInterface,
+    val appRepo: RepoInterface,
     private val resUtils: ResourcesUtils
 ) : BaseViewModel() {
     val isHistoryLoading = ObservableBoolean(false)
@@ -36,6 +38,12 @@ class DetailsViewModel @Inject constructor(
     private val historyList = ArrayList<HistoryGroupIVM>()
     val historyAdapter = BaseAdapter(historyList, null)
 
+    //Status
+    private val _conversionsHistoryStatus = MutableLiveData<Resources<List<ConvertedCurrencies>>>()
+    val conversionsHistoryStatus = _conversionsHistoryStatus
+    private val _topCurrenciesRatesStatus = MutableLiveData<Resources<CurrenciesRatesResponse?>>()
+    val topCurrenciesRatesStatus = _topCurrenciesRatesStatus
+
     override fun onViewCreated() {
         super.onViewCreated()
         initViewData()
@@ -47,19 +55,7 @@ class DetailsViewModel @Inject constructor(
         getHistoryConversion()
     }
 
-
-    private fun updatePieChartData(list: List<ConvertedCurrencies>) {
-        val listMapped =
-            list.map { "${it.fromCurrency} -> ${it.toCurrency}" }.toList().groupingBy { it }
-                .eachCount()
-        val map = HashMap<String, Float>()
-        for (item in listMapped)
-            map[item.key] = item.value.toFloat() / list.size
-
-        historyChartItem.set(map)
-    }
-
-    private fun getHistoryConversion() {
+    fun getHistoryConversion() {
         val fromDate = Calendar.getInstance().apply { add(Calendar.DATE, -1) }.time
         val toDate = Calendar.getInstance().apply { add(Calendar.DATE, -3) }.time
         isHistoryLoading.set(true)
@@ -70,6 +66,8 @@ class DetailsViewModel @Inject constructor(
             )
         }, { response ->
             isHistoryLoading.set(false)
+            _conversionsHistoryStatus.value = response
+
             if (response.status == Resources.DataStatus.SUCCESS) {
                 val list = response.data
                 if (!list.isNullOrEmpty()) {
@@ -92,14 +90,20 @@ class DetailsViewModel @Inject constructor(
                 )
             }
         })
-
     }
 
-    private fun getTopCurrenciesRates() {
+    fun getTopCurrenciesRates() {
         val baseCurrency = extrasData?.getString(Constants.keyBaseCurrency)
         val amount = extrasData?.getString(Constants.keyConvertAmount)
         if (baseCurrency.isNullOrEmpty() || amount.isNullOrEmpty()) {
             ratesErrorMsg.set(getString(R.string.str_empty_from_currency_error))
+
+            _topCurrenciesRatesStatus.postValue(
+                Resources<CurrenciesRatesResponse?>().apply {
+                    error(Exception("Please Select From Currency first to get Currencies Rates"))
+                }
+            )
+
             return
         }
 
@@ -107,6 +111,8 @@ class DetailsViewModel @Inject constructor(
         isRatesLoading.set(true)
         call({ appRepo.convertAmountToPopularCurrencies(baseCurrency) }, { response ->
             isRatesLoading.set(false)
+            _topCurrenciesRatesStatus.value = response
+
             if (response.status == Resources.DataStatus.SUCCESS) {
                 ratesList.clear()
                 if (response.data?.rates?.isEmpty() == true) {
@@ -125,6 +131,16 @@ class DetailsViewModel @Inject constructor(
         })
     }
 
+    private fun updatePieChartData(list: List<ConvertedCurrencies>) {
+        val listMapped =
+            list.map { "${it.fromCurrency} -> ${it.toCurrency}" }.toList().groupingBy { it }
+                .eachCount()
+        val map = HashMap<String, Float>()
+        for (item in listMapped)
+            map[item.key] = item.value.toFloat() / list.size
+
+        historyChartItem.set(map)
+    }
+
     private fun getString(resId: Int): String = resUtils.getString(resId)
-//    private fun showErrorDialog(errorMsg:String?) = resUtils.showErrorDialog(errorMsg)
 }
