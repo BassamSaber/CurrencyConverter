@@ -1,4 +1,4 @@
-package com.samz.convertcurrency.repo.model.generalResponse
+package com.samz.convertcurrency.model.generalResponse
 
 import androidx.lifecycle.MutableLiveData
 

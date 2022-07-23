@@ -2,9 +2,9 @@ package com.samz.convertcurrency.di
 
 import android.content.Context
 import androidx.room.Room
-import com.samz.convertcurrency.repo.db.AppDatabase
-import com.samz.convertcurrency.repo.db.DatabaseHelper
-import com.samz.convertcurrency.repo.db.dao.HistoryConversionDao
+import com.samz.convertcurrency.db.AppDatabase
+import com.samz.convertcurrency.db.DatabaseHelper
+import com.samz.convertcurrency.db.dao.HistoryConversionDao
 import com.samz.convertcurrency.utils.Constants
 import dagger.Module
 import dagger.Provides

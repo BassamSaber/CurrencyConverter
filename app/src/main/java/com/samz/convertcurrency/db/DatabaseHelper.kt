@@ -1,7 +1,7 @@
-package com.samz.convertcurrency.repo.db
+package com.samz.convertcurrency.db
 
-import com.samz.convertcurrency.repo.db.dao.HistoryConversionDao
-import com.samz.convertcurrency.repo.model.ConvertedCurrencies
+import com.samz.convertcurrency.db.dao.HistoryConversionDao
+import com.samz.convertcurrency.model.ConvertedCurrencies
 import javax.inject.Inject
 
 class DatabaseHelper @Inject constructor(private val conversionDao: HistoryConversionDao) {
@@ -16,9 +16,6 @@ class DatabaseHelper @Inject constructor(private val conversionDao: HistoryConve
         from: String,
         to: String
     ) = conversionDao.fetchConversionHistoryBetweenDates(from, to)
-
-    suspend fun fetchConversionHistoryLessThanDate(oldDate: String) =
-        conversionDao.fetchConversionHistoryLessThanDate(oldDate)
 
     suspend fun deleteOlderHistory(oldDate: String) =
         conversionDao.deleteOlderHistory(oldDate)

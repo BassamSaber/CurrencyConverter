@@ -1,4 +1,4 @@
-package com.samz.convertcurrency.repo.remote.interceptors
+package com.samz.convertcurrency.remote.interceptors
 
 import android.content.Context
 import com.samz.convertcurrency.utils.NetworkUtils

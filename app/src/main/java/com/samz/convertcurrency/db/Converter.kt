@@ -1,4 +1,4 @@
-package com.samz.convertcurrency.repo.db
+package com.samz.convertcurrency.db
 
 import androidx.room.TypeConverter
 import java.text.ParseException

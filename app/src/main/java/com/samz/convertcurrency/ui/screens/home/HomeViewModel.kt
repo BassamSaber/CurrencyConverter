@@ -9,9 +9,9 @@ import androidx.databinding.ObservableField
 import androidx.databinding.ObservableInt
 import androidx.lifecycle.LifecycleOwner
 import com.samz.convertcurrency.R
+import com.samz.convertcurrency.model.ConvertedCurrencies
+import com.samz.convertcurrency.model.generalResponse.Resources
 import com.samz.convertcurrency.repo.AppRepo
-import com.samz.convertcurrency.repo.model.ConvertedCurrencies
-import com.samz.convertcurrency.repo.model.generalResponse.Resources
 import com.samz.convertcurrency.ui.base.BaseViewModel
 import com.samz.convertcurrency.utils.*
 import dagger.hilt.android.lifecycle.HiltViewModel

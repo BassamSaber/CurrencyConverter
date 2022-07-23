@@ -1,7 +1,7 @@
-package com.samz.convertcurrency.repo.remote
+package com.samz.convertcurrency.remote
 
 import android.util.Log
-import com.samz.convertcurrency.repo.model.GeneralResponse
+import com.samz.convertcurrency.model.GeneralResponse
 import com.samz.convertcurrency.utils.ApiException
 import org.json.JSONException
 import org.json.JSONObject
@@ -10,6 +10,7 @@ import retrofit2.Response
 /**
  * Generic Class for customizing the API error response
  */
+@Suppress("BlockingMethodInNonBlockingContext")
 open class SafeApiCall {
     suspend fun <T : GeneralResponse> invokeRequest(call: suspend () -> Response<T>): T? {
         val response: Response<T> = call.invoke()
@@ -23,14 +24,14 @@ open class SafeApiCall {
                     responseBody.errorResponse?.errorMsg ?: ""
                 )
         } else {
-            val error = response.errorBody()?.toString()
+            val error = response.errorBody()?.string()
             val message = StringBuilder()
             error?.let {
                 try {
                     message.append(JSONObject(it).getString("message"))
                     message.append("\n")
                 } catch (e: JSONException) {
-                    Log.i("JSONException", "Exception in ${SafeApiCall::class.java.name}")
+                    Log.i("JSONException", "Exception: $e")
                 }
 
             }

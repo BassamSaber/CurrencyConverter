@@ -1,6 +1,6 @@
-package com.samz.convertcurrency.repo.remote.interceptors
+package com.samz.convertcurrency.remote.interceptors
 
-import com.samz.convertcurrency.repo.remote.APIConstants
+import com.samz.convertcurrency.BuildConfig
 import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.Response
@@ -26,7 +26,7 @@ class HeaderInterceptor : Interceptor {
         val headers = HashMap<String, String>()
         headers["Accept"] = "application/json"
         headers["Content-Type"] = "application/json"
-        headers["apikey"] = APIConstants.accessToken
+        headers["apikey"] = BuildConfig.API_KEY
 
         return headers
     }

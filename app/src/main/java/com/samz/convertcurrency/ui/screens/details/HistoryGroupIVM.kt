@@ -3,7 +3,7 @@ package com.samz.convertcurrency.ui.screens.details
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import com.samz.convertcurrency.R
-import com.samz.convertcurrency.repo.model.ConvertedCurrencies
+import com.samz.convertcurrency.model.ConvertedCurrencies
 import com.samz.convertcurrency.ui.base.adapter.BaseAdapter
 import com.samz.convertcurrency.ui.base.adapter.BaseItemViewModel
 

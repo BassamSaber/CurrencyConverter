@@ -1,4 +1,4 @@
-package com.samz.convertcurrency.repo.model
+package com.samz.convertcurrency.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

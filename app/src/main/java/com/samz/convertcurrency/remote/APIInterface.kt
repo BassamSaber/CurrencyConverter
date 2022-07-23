@@ -1,8 +1,8 @@
-package com.samz.convertcurrency.repo.remote
+package com.samz.convertcurrency.remote
 
-import com.samz.convertcurrency.repo.model.ConvertCurrencyResponse
-import com.samz.convertcurrency.repo.model.CurrenciesRatesResponse
-import com.samz.convertcurrency.repo.model.SymbolResponse
+import com.samz.convertcurrency.model.ConvertCurrencyResponse
+import com.samz.convertcurrency.model.CurrenciesRatesResponse
+import com.samz.convertcurrency.model.SymbolResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query

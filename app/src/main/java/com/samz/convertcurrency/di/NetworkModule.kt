@@ -3,10 +3,10 @@ package com.samz.convertcurrency.di
 import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.samz.convertcurrency.repo.remote.APIConstants
-import com.samz.convertcurrency.repo.remote.APIInterface
-import com.samz.convertcurrency.repo.remote.interceptors.ConnectivityInterceptor
-import com.samz.convertcurrency.repo.remote.interceptors.HeaderInterceptor
+import com.samz.convertcurrency.remote.APIConstants
+import com.samz.convertcurrency.remote.APIInterface
+import com.samz.convertcurrency.remote.interceptors.ConnectivityInterceptor
+import com.samz.convertcurrency.remote.interceptors.HeaderInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

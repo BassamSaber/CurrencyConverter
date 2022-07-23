@@ -1,6 +1,6 @@
 package com.samz.convertcurrency.utils
 
-import com.samz.convertcurrency.repo.model.generalResponse.ResourcesLiveData
+import com.samz.convertcurrency.model.generalResponse.ResourcesLiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -1,10 +1,10 @@
 package com.samz.convertcurrency.repo
 
-import com.samz.convertcurrency.repo.db.DatabaseHelper
-import com.samz.convertcurrency.repo.model.ConvertedCurrencies
-import com.samz.convertcurrency.repo.model.CurrenciesRatesResponse
-import com.samz.convertcurrency.repo.remote.APIInterface
-import com.samz.convertcurrency.repo.remote.SafeApiCall
+import com.samz.convertcurrency.db.DatabaseHelper
+import com.samz.convertcurrency.model.ConvertedCurrencies
+import com.samz.convertcurrency.model.CurrenciesRatesResponse
+import com.samz.convertcurrency.remote.APIInterface
+import com.samz.convertcurrency.remote.SafeApiCall
 import com.samz.convertcurrency.utils.Coroutines
 import javax.inject.Inject
 
@@ -16,12 +16,12 @@ import javax.inject.Inject
 class AppRepo @Inject constructor(
     private val apiClient: APIInterface,
     private val databaseHelper: DatabaseHelper
-) : SafeApiCall() {
+) : RepoInterface, SafeApiCall() {
 
     /**
      * return all the Available Currencies Symbols to be Viewed
      */
-    suspend fun getCurrencySymbols() = invokeRequest { apiClient.getCurrencySymbols() }
+    override suspend fun getCurrencySymbols() = invokeRequest { apiClient.getCurrencySymbols() }
 
     /**
      * @param amount The amount to be converted.
@@ -30,7 +30,11 @@ class AppRepo @Inject constructor(
      *
      * convert any amount from one currency to another. In order to convert currency.
      */
-    suspend fun convertCurrencyAmount(amount: Double, fromCurrency: String, toCurrency: String) =
+    override suspend fun convertCurrencyAmount(
+        amount: Double,
+        fromCurrency: String,
+        toCurrency: String
+    ) =
         invokeRequest { apiClient.convertCurrencyAmount(amount, fromCurrency, toCurrency) }
 
     /**
@@ -41,7 +45,7 @@ class AppRepo @Inject constructor(
      *
      * Returns real-time exchange rate data for the top 10 Popular currencies to the baseCurrency
      */
-    suspend fun convertAmountToPopularCurrencies(baseCurrency: String): CurrenciesRatesResponse? {
+    override suspend fun convertAmountToPopularCurrencies(baseCurrency: String): CurrenciesRatesResponse? {
         val popularCurrencies = arrayOf(
             "USD",
             "EUR",
@@ -61,13 +65,13 @@ class AppRepo @Inject constructor(
         return invokeRequest { apiClient.getCurrenciesRates(baseCurrency, symbols) }
     }
 
-    fun newCurrenciesConversion(convertedCurrencies: ConvertedCurrencies) =
+    override fun newCurrenciesConversion(convertedCurrencies: ConvertedCurrencies) =
         Coroutines.call { databaseHelper.newCurrencyConversion(convertedCurrencies) }
 
-    fun fetchConversionHistory(fromDate: String, toDate: String) =
+    override fun fetchConversionHistory(fromDate: String, toDate: String) =
         Coroutines.call { databaseHelper.fetchConversionHistoryBetweenDates(fromDate, toDate) }
 
-    fun deleteOldConversions(oldDate: String) =
+    override fun deleteOldConversions(oldDate: String) =
         Coroutines.call { databaseHelper.deleteOlderHistory(oldDate) }
 
 }
