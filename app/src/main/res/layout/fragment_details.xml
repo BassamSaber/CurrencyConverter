@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -19,30 +20,122 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/tv_chart"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/cl_chart"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="@dimen/_200sdp"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:layout_marginTop="@dimen/_10sdp"
+                android:minHeight="@dimen/_150sdp"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <TextView
+                    android:id="@+id/tv_chart_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/convert_history_chart_label"
+                    android:textSize="@dimen/_13ssp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ProgressBar
+                    android:layout_width="@dimen/_25sdp"
+                    android:layout_height="@dimen/_25sdp"
+                    android:visibility="@{viewModel.isHistoryLoading ? View.VISIBLE : View.GONE}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_chart_label"
+                    tools:visibility="gone" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@{viewModel.historyErrorMsg}"
+                    android:textSize="@dimen/_11ssp"
+                    android:visibility="@{!viewModel.historyErrorMsg.isEmpty() ? View.VISIBLE : View.GONE}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_chart_label"
+                    tools:text="@string/str_empty_history"
+                    tools:visibility="gone" />
+
+                <com.github.mikephil.charting.charts.PieChart
+                    android:id="@+id/piechart"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/_150sdp"
+                    pieChartItems="@{viewModel.historyChartItem}"
+                    app:layout_constraintTop_toBottomOf="@id/tv_chart_label" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <View
                 android:id="@+id/divider_1"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/_1sdp"
                 android:background="@color/dividerColor"
-                app:layout_constraintTop_toBottomOf="@id/tv_chart"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintTop_toBottomOf="@id/cl_chart" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/cl_history"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:minHeight="@dimen/_400sdp"
+                android:padding="@dimen/_6sdp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/divider_1"
                 app:layout_constraintWidth_percent="0.48">
+
+                <TextView
+                    android:id="@+id/tv_history_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/convert_history_label"
+                    android:textSize="@dimen/_13ssp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ProgressBar
+                    android:layout_width="@dimen/_25sdp"
+                    android:layout_height="@dimen/_25sdp"
+                    android:visibility="@{viewModel.isHistoryLoading ? View.VISIBLE : View.GONE}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_history_label"
+                    tools:visibility="gone" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@{viewModel.historyErrorMsg}"
+                    android:textSize="@dimen/_11ssp"
+                    android:visibility="@{!viewModel.historyErrorMsg.isEmpty() ? View.VISIBLE : View.GONE}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_history_label"
+                    tools:text="@string/str_empty_history"
+                    tools:visibility="gone" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    adapter="@{viewModel.historyAdapter}"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_15sdp"
+                    app:layout_constraintTop_toBottomOf="@id/tv_history_label"
+                    tools:itemCount="3"
+                    tools:listitem="@layout/item_convert_history_group" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -51,19 +144,82 @@
                 android:layout_height="0dp"
                 android:background="@color/dividerColor"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/divider_1"
+                app:layout_constraintEnd_toStartOf="@id/cl_top_currencies"
                 app:layout_constraintStart_toEndOf="@id/cl_history"
-                app:layout_constraintEnd_toStartOf="@id/cl_top_currencies" />
+                app:layout_constraintTop_toBottomOf="@id/divider_1" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/cl_top_currencies"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:minHeight="@dimen/_400sdp"
+                android:padding="@dimen/_10sdp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@id/cl_history"
                 app:layout_constraintWidth_percent="0.48">
 
+                <TextView
+                    android:id="@+id/tv_top_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/top_10_currencies_values"
+                    android:textSize="@dimen/_13ssp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ProgressBar
+                    android:layout_width="@dimen/_25sdp"
+                    android:layout_height="@dimen/_25sdp"
+                    android:visibility="@{viewModel.isRatesLoading ? View.VISIBLE : View.GONE}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_top_label"
+                    tools:visibility="gone" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@{viewModel.ratesErrorMsg}"
+                    android:textSize="@dimen/_11ssp"
+                    android:visibility="@{!viewModel.ratesErrorMsg.isEmpty() ? View.VISIBLE : View.GONE}"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_top_label"
+                    tools:text="@string/str_empty_from_currency_error"
+                    tools:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/tv_fromCurrency"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_16sdp"
+                    android:gravity="center"
+                    android:text="@{viewModel.fromAmountWithCurrency}"
+                    android:textSize="@dimen/_11ssp"
+                    android:textStyle="bold|italic"
+                    android:visibility="@{!viewModel.fromAmountWithCurrency.isEmpty() ? View.VISIBLE : View.GONE}"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_top_label"
+                    tools:text="100 EGP" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    adapter="@{viewModel.ratesAdapter}"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:background="@drawable/rectangle_bg"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_fromCurrency"
+                    tools:itemCount="10"
+                    tools:listitem="@layout/item_currency_rate" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>

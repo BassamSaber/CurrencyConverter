@@ -8,4 +8,9 @@
     <string name="try_again">Try Again</string>
     <string name="str_error">Error</string>
     <string name="str_ok">Ok</string>
+    <string name="top_10_currencies_values">Top 10 Currencies Values</string>
+    <string name="str_empty_from_currency_error">Please Select From Currency first to get Currencies Rates</string>
+    <string name="convert_history_label">Latest 3 days Converts History</string>
+    <string name="str_empty_history">You don\'t have an conversion for the last 3 days</string>
+    <string name="convert_history_chart_label">Latest 3 days history chart</string>
 </resources>

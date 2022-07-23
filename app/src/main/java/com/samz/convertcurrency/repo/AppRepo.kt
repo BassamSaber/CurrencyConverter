@@ -48,8 +48,9 @@ class AppRepo @Inject constructor(private val apiClient: APIInterface) : SafeApi
             "HKD",
             "NZD"
         )
-        val endIndex = popularCurrencies.toString().length - 1
-        val symbols = popularCurrencies.toString().substring(1, endIndex)
+        val popularCurrenciesStr = popularCurrencies.contentToString()
+        val endIndex = popularCurrenciesStr.length - 1
+        val symbols = popularCurrenciesStr.substring(1, endIndex)
 
         return invokeRequest { apiClient.getCurrenciesRates(baseCurrency, symbols) }
     }
