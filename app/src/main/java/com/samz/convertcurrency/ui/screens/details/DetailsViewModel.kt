@@ -9,7 +9,6 @@ import com.samz.convertcurrency.repo.RepoInterface
 import com.samz.convertcurrency.ui.base.BaseViewModel
 import com.samz.convertcurrency.ui.base.adapter.BaseAdapter
 import com.samz.convertcurrency.utils.Constants
-import com.samz.convertcurrency.utils.Coroutines
 import com.samz.convertcurrency.utils.ResourcesUtils
 import com.samz.convertcurrency.utils.Utilities
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -64,7 +63,7 @@ class DetailsViewModel @Inject constructor(
         val fromDate = Calendar.getInstance().apply { add(Calendar.DATE, -1) }.time
         val toDate = Calendar.getInstance().apply { add(Calendar.DATE, -3) }.time
         isHistoryLoading.set(true)
-        Coroutines.call({
+        call({
             appRepo.fetchConversionHistory(
                 Utilities.formatDate(fromDate),
                 Utilities.formatDate(toDate)
@@ -106,7 +105,7 @@ class DetailsViewModel @Inject constructor(
 
         fromAmountWithCurrency.set("$amount $baseCurrency")
         isRatesLoading.set(true)
-        Coroutines.call({ appRepo.convertAmountToPopularCurrencies(baseCurrency) }, { response ->
+        call({ appRepo.convertAmountToPopularCurrencies(baseCurrency) }, { response ->
             isRatesLoading.set(false)
             if (response.status == Resources.DataStatus.SUCCESS) {
                 ratesList.clear()

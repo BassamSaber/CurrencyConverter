@@ -6,6 +6,7 @@ import androidx.databinding.ObservableArrayList
 import androidx.databinding.ObservableBoolean
 import androidx.databinding.ObservableField
 import androidx.databinding.ObservableInt
+import androidx.lifecycle.MutableLiveData
 import com.samz.convertcurrency.R
 import com.samz.convertcurrency.model.ConvertedCurrencies
 import com.samz.convertcurrency.model.generalResponse.Resources
@@ -32,6 +33,7 @@ class HomeViewModel @Inject constructor(
     val toValue = ObservableField("")
     var rate: Double = 0.0
 
+    val fetchedCurrenciesSymbolsSize = MutableLiveData<Int>()
     val currencySymbolsFromList = ObservableArrayList<String>()
     val currencySymbolsToList = ObservableArrayList<String>()
     var fromSelectedCurrency = ObservableInt(0)
@@ -63,7 +65,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun clearOldConversion() {
-        Coroutines.call({
+        call({
             appRepo.deleteOldConversions(
                 Utilities.formatDate(
                     Calendar.getInstance().apply { add(Calendar.DATE, -3) }.time
@@ -77,7 +79,7 @@ class HomeViewModel @Inject constructor(
 
     fun initCurrenciesSymbols() {
         isLoading.set(true)
-        Coroutines.call({ appRepo.getCurrencySymbols() }, { response ->
+        call({ appRepo.getCurrencySymbols() }, { response ->
             isLoading.set(false)
             if (response.status == Resources.DataStatus.SUCCESS) {
                 errorMsg.set("")
@@ -87,12 +89,15 @@ class HomeViewModel @Inject constructor(
                 response.data?.symbols?.keys?.let {
                     currencySymbolsFromList.addAll(it)
                     currencySymbolsToList.addAll(it)
+                    fetchedCurrenciesSymbolsSize.value = it.size
                 }
+
             } else if (response.status == Resources.DataStatus.ERROR) {
                 errorMsg.set(response.error?.message ?: "Error")
                 isNetworkError.set(response.error is NoInternetException)
             }
         })
+
     }
 
     private fun convertCurrencyAmount() {
@@ -104,7 +109,7 @@ class HomeViewModel @Inject constructor(
             setConversionResult((amount * rate))
         } else {
             isConvertLoading.set(true)
-            Coroutines.call({
+            call({
                 appRepo.convertCurrencyAmount(
                     amount,
                     currencySymbolsFromList[fromSelectedCurrency.get()],
@@ -133,7 +138,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun saveCurrenciesConversion() {
-        Coroutines.call({
+        call({
             appRepo.newCurrenciesConversion(
                 ConvertedCurrencies(
                     currencySymbolsFromList[fromSelectedCurrency.get()],
