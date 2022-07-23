@@ -1,4 +1,4 @@
-package com.samz.convertcurrency.ui.base
+package com.samz.convertcurrency.ui.base.adapter
 
 import android.content.Context
 import android.view.View

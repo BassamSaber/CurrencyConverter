@@ -1,6 +1,8 @@
 package com.samz.convertcurrency.ui.base
 
 import android.content.Context
+import android.os.Bundle
+import androidx.annotation.CallSuper
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
@@ -15,11 +17,14 @@ abstract class BaseViewModel : ViewModel() {
     lateinit var lifecycleOwner: LifecycleOwner
     lateinit var context: Context
 
+    @CallSuper
     open fun onViewCreated(context: Context, lifecycleOwner: LifecycleOwner) {
         isViewAttached = true
         this.context = context
         this.lifecycleOwner = lifecycleOwner
     }
+
+    var extrasData: Bundle? = null
 
     fun getString(resId: Int): String {
         return context.getString(resId)
