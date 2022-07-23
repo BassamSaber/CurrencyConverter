@@ -11,7 +11,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.samz.convertcurrency.R
 import com.samz.convertcurrency.model.ConvertedCurrencies
 import com.samz.convertcurrency.model.generalResponse.Resources
-import com.samz.convertcurrency.repo.AppRepo
+import com.samz.convertcurrency.repo.RepoInterface
 import com.samz.convertcurrency.ui.base.BaseViewModel
 import com.samz.convertcurrency.utils.*
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +19,7 @@ import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(private val appRepo: AppRepo) : BaseViewModel() {
+class HomeViewModel @Inject constructor(private val appRepo: RepoInterface) : BaseViewModel() {
 
     val isLoading = ObservableBoolean(false)
     val isNetworkError = ObservableBoolean(false)

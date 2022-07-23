@@ -7,7 +7,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.samz.convertcurrency.R
 import com.samz.convertcurrency.model.ConvertedCurrencies
 import com.samz.convertcurrency.model.generalResponse.Resources
-import com.samz.convertcurrency.repo.AppRepo
+import com.samz.convertcurrency.repo.RepoInterface
 import com.samz.convertcurrency.ui.base.BaseViewModel
 import com.samz.convertcurrency.ui.base.adapter.BaseAdapter
 import com.samz.convertcurrency.utils.Constants
@@ -19,7 +19,7 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class DetailsViewModel @Inject constructor(private val appRepo: AppRepo) : BaseViewModel() {
+class DetailsViewModel @Inject constructor(private val appRepo: RepoInterface) : BaseViewModel() {
     val isHistoryLoading = ObservableBoolean(false)
     val isRatesLoading = ObservableBoolean(false)
 
