@@ -8,7 +8,9 @@ import androidx.databinding.ObservableField
 import androidx.databinding.ObservableInt
 import androidx.lifecycle.MutableLiveData
 import com.samz.convertcurrency.R
+import com.samz.convertcurrency.model.ConvertCurrencyResponse
 import com.samz.convertcurrency.model.ConvertedCurrencies
+import com.samz.convertcurrency.model.SymbolResponse
 import com.samz.convertcurrency.model.generalResponse.Resources
 import com.samz.convertcurrency.repo.RepoInterface
 import com.samz.convertcurrency.ui.base.BaseViewModel
@@ -19,7 +21,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val appRepo: RepoInterface,
+    val appRepo: RepoInterface,
     private val resUtils: ResourcesUtils
 ) : BaseViewModel() {
 
@@ -33,7 +35,6 @@ class HomeViewModel @Inject constructor(
     val toValue = ObservableField("")
     var rate: Double = 0.0
 
-    val fetchedCurrenciesSymbolsSize = MutableLiveData<Int>()
     val currencySymbolsFromList = ObservableArrayList<String>()
     val currencySymbolsToList = ObservableArrayList<String>()
     var fromSelectedCurrency = ObservableInt(0)
@@ -57,6 +58,17 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+
+    //Status
+    private val _currenciesSymbolsStatus = MutableLiveData<Resources<SymbolResponse?>>()
+    val currenciesSymbolsStatus = _currenciesSymbolsStatus
+    private val _convertCurrenciesStatus = MutableLiveData<Resources<ConvertCurrencyResponse?>>()
+    val convertCurrenciesStatus = _convertCurrenciesStatus
+    private val _saveConversionsStatus = MutableLiveData<Resources<Unit>>()
+    val saveConversionsStatus = _saveConversionsStatus
+    private val _deleteOldConversionsStatus = MutableLiveData<Resources<Unit>>()
+    val deleteOldConversionsStatus = _deleteOldConversionsStatus
+
     override fun onViewCreated() {
         super.onViewCreated()
         initCurrenciesSymbols()
@@ -64,7 +76,7 @@ class HomeViewModel @Inject constructor(
         clearOldConversion()
     }
 
-    private fun clearOldConversion() {
+    fun clearOldConversion() {
         call({
             appRepo.deleteOldConversions(
                 Utilities.formatDate(
@@ -72,6 +84,7 @@ class HomeViewModel @Inject constructor(
                 )
             )
         }, { response ->
+            _deleteOldConversionsStatus.value = response
             if (response.status == Resources.DataStatus.ERROR)
                 showErrorDialog(response.error?.message)
         })
@@ -81,6 +94,8 @@ class HomeViewModel @Inject constructor(
         isLoading.set(true)
         call({ appRepo.getCurrencySymbols() }, { response ->
             isLoading.set(false)
+            _currenciesSymbolsStatus.value = response
+
             if (response.status == Resources.DataStatus.SUCCESS) {
                 errorMsg.set("")
 
@@ -89,7 +104,6 @@ class HomeViewModel @Inject constructor(
                 response.data?.symbols?.keys?.let {
                     currencySymbolsFromList.addAll(it)
                     currencySymbolsToList.addAll(it)
-                    fetchedCurrenciesSymbolsSize.value = it.size
                 }
 
             } else if (response.status == Resources.DataStatus.ERROR) {
@@ -100,10 +114,17 @@ class HomeViewModel @Inject constructor(
 
     }
 
-    private fun convertCurrencyAmount() {
+    fun convertCurrencyAmount() {
         if (fromValue.get()
                 .isNullOrEmpty() || fromSelectedCurrency.get() == 0 || toSelectedCurrency.get() == 0
-        ) return
+        ) {
+            _convertCurrenciesStatus.postValue(Resources<ConvertCurrencyResponse?>().apply {
+                error(
+                    Exception("Please select from/to currencies and enter amount")
+                )
+            })
+            return
+        }
         val amount = fromValue.get()?.toDouble() ?: 1.0
         if (rate != 0.0) {
             setConversionResult((amount * rate))
@@ -117,6 +138,8 @@ class HomeViewModel @Inject constructor(
                 )
             }, { response ->
                 isConvertLoading.set(false)
+                _convertCurrenciesStatus.value = response
+
                 if (response.status == Resources.DataStatus.SUCCESS) {
                     rate = response.data?.rate ?: 0.0
                     if (response.data?.amount == fromValue.get()?.toDouble()) {
@@ -133,11 +156,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun setConversionResult(result: Double) {
-        toValue.set(String.format("%.5f", result))
-    }
-
-    private fun saveCurrenciesConversion() {
+    fun saveCurrenciesConversion() {
         call({
             appRepo.newCurrenciesConversion(
                 ConvertedCurrencies(
@@ -146,7 +165,9 @@ class HomeViewModel @Inject constructor(
                     Calendar.getInstance().time
                 )
             )
-        }, {})
+        }, { response ->
+            _saveConversionsStatus.value = response
+        })
     }
 
     fun swapFromToCurrencies() {
@@ -164,6 +185,10 @@ class HomeViewModel @Inject constructor(
 
     fun afterTextChanged(editable: Editable) {
         convertCurrencyAmount()
+    }
+
+    private fun setConversionResult(result: Double) {
+        toValue.set(String.format("%.5f", result))
     }
 
     fun getDetailsNavData(): Bundle {
