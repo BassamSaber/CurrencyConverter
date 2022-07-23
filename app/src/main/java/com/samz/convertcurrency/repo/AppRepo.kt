@@ -1,8 +1,11 @@
 package com.samz.convertcurrency.repo
 
+import com.samz.convertcurrency.repo.db.DatabaseHelper
+import com.samz.convertcurrency.repo.model.ConvertedCurrencies
 import com.samz.convertcurrency.repo.model.CurrenciesRatesResponse
 import com.samz.convertcurrency.repo.remote.APIInterface
 import com.samz.convertcurrency.repo.remote.SafeApiCall
+import com.samz.convertcurrency.utils.Coroutines
 import javax.inject.Inject
 
 /**
@@ -10,7 +13,10 @@ import javax.inject.Inject
  *
  * The Repo Class that response for calling the API or the Locale data
  */
-class AppRepo @Inject constructor(private val apiClient: APIInterface) : SafeApiCall() {
+class AppRepo @Inject constructor(
+    private val apiClient: APIInterface,
+    private val databaseHelper: DatabaseHelper
+) : SafeApiCall() {
 
     /**
      * return all the Available Currencies Symbols to be Viewed
@@ -54,4 +60,14 @@ class AppRepo @Inject constructor(private val apiClient: APIInterface) : SafeApi
 
         return invokeRequest { apiClient.getCurrenciesRates(baseCurrency, symbols) }
     }
+
+    fun newCurrenciesConversion(convertedCurrencies: ConvertedCurrencies) =
+        Coroutines.call { databaseHelper.newCurrencyConversion(convertedCurrencies) }
+
+    fun fetchConversionHistory(fromDate: String, toDate: String) =
+        Coroutines.call { databaseHelper.fetchConversionHistoryBetweenDates(fromDate, toDate) }
+
+    fun deleteOldConversions(oldDate: String) =
+        Coroutines.call { databaseHelper.deleteOlderHistory(oldDate) }
+
 }

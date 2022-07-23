@@ -21,7 +21,7 @@ object Utilities {
         return ContextCompat.getColor(context, id)
     }
 
-    fun dateFormatForDisplay(date: Date): String {
+    fun formatDate(date: Date): String {
         val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
         return simpleDateFormat.format(date)
     }

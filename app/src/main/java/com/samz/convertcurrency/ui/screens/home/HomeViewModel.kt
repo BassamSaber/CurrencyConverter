@@ -10,13 +10,12 @@ import androidx.databinding.ObservableInt
 import androidx.lifecycle.LifecycleOwner
 import com.samz.convertcurrency.R
 import com.samz.convertcurrency.repo.AppRepo
+import com.samz.convertcurrency.repo.model.ConvertedCurrencies
 import com.samz.convertcurrency.repo.model.generalResponse.Resources
 import com.samz.convertcurrency.ui.base.BaseViewModel
-import com.samz.convertcurrency.utils.Constants
-import com.samz.convertcurrency.utils.Coroutines
-import com.samz.convertcurrency.utils.NoInternetException
-import com.samz.convertcurrency.utils.SpinnerInterface
+import com.samz.convertcurrency.utils.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -58,6 +57,19 @@ class HomeViewModel @Inject constructor(private val appRepo: AppRepo) : BaseView
     override fun onViewCreated(context: Context, lifecycleOwner: LifecycleOwner) {
         super.onViewCreated(context, lifecycleOwner)
         initCurrenciesSymbols()
+
+        clearOldConversion()
+    }
+
+    private fun clearOldConversion() {
+        appRepo.deleteOldConversions(
+            Utilities.formatDate(
+                Calendar.getInstance().apply { add(Calendar.DATE, -3) }.time
+            )
+        ).observe(lifecycleOwner) { response ->
+            if (response.status == Resources.DataStatus.ERROR)
+                showErrorDialog(response.error?.message)
+        }
     }
 
     fun initCurrenciesSymbols() {
@@ -86,7 +98,7 @@ class HomeViewModel @Inject constructor(private val appRepo: AppRepo) : BaseView
         ) return
         val amount = fromValue.get()?.toDouble() ?: 1.0
         if (rate != 0.0) {
-            toValue.set((amount * rate).toString())
+            setConversionResult((amount * rate))
         } else {
             isConvertLoading.set(true)
             convertCurrencyAmount(
@@ -97,17 +109,32 @@ class HomeViewModel @Inject constructor(private val appRepo: AppRepo) : BaseView
                 isConvertLoading.set(false)
                 if (response.status == Resources.DataStatus.SUCCESS) {
                     rate = response.data?.rate ?: 0.0
-//                    if (response.data?.amount == fromValue.get()?.toDouble()) {
-                    toValue.set(response.data?.rate.toString())
-//                    } else {
-//                        val newAmount = fromValue.get()?.toDouble() ?: 1.0
-//                        toValue.set((newAmount * rate).toString())
-//                    }
+                    if (response.data?.amount == fromValue.get()?.toDouble()) {
+                        setConversionResult(response.data?.result ?: 0.0)
+                    } else {
+                        val newAmount = fromValue.get()?.toDouble() ?: 1.0
+                        setConversionResult((newAmount * rate))
+                    }
+                    saveCurrenciesConversion()
                 } else if (response.status == Resources.DataStatus.ERROR) {
                     showErrorDialog(response.error?.message)
                 }
             }
         }
+    }
+
+    private fun setConversionResult(result: Double) {
+        toValue.set(String.format("%.5f", result))
+    }
+
+    private fun saveCurrenciesConversion() {
+        appRepo.newCurrenciesConversion(
+            ConvertedCurrencies(
+                currencySymbolsFromList[fromSelectedCurrency.get()],
+                currencySymbolsToList[toSelectedCurrency.get()],
+                Calendar.getInstance().time
+            )
+        )
     }
 
     fun swapFromToCurrencies() {

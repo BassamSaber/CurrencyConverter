@@ -59,35 +59,35 @@ class DetailsViewModel @Inject constructor(private val appRepo: AppRepo) : BaseV
     }
 
     private fun getHistoryConversion() {
-        val list = ArrayList<ConvertedCurrencies>()
-        val calendar = Calendar.getInstance()
-        list.add(ConvertedCurrencies("EGP", "USD", calendar.time))
-        list.add(ConvertedCurrencies("EGP", "EUR", calendar.time))
-        list.add(ConvertedCurrencies("EGP", "AUR", calendar.time))
-        list.add(ConvertedCurrencies("EUR", "USD", calendar.time))
-        list.add(ConvertedCurrencies("EGP", "USD", calendar.time))
-        calendar.add(Calendar.DATE, -1)
-        list.add(ConvertedCurrencies("EUR", "USD", calendar.time))
-        list.add(ConvertedCurrencies("EGP", "JPY", calendar.time))
-        list.add(ConvertedCurrencies("EUR", "USD", calendar.time))
-        calendar.add(Calendar.DATE, -1)
-        list.add(ConvertedCurrencies("EUR", "USD", calendar.time))
-        list.add(ConvertedCurrencies("EGP", "USD", calendar.time))
-        list.add(ConvertedCurrencies("CNH", "AUR", calendar.time))
-        list.add(ConvertedCurrencies("AUR", "CNH", calendar.time))
+        val fromDate = Calendar.getInstance().apply { add(Calendar.DATE, -1) }.time
+        val toDate = Calendar.getInstance().apply { add(Calendar.DATE, -3) }.time
+        isHistoryLoading.set(true)
+        appRepo.fetchConversionHistory(Utilities.formatDate(fromDate), Utilities.formatDate(toDate))
+            .observe(lifecycleOwner) { response ->
+                isHistoryLoading.set(false)
+                if (response.status == Resources.DataStatus.SUCCESS) {
+                    val list = response.data
+                    if (!list.isNullOrEmpty()) {
+                        updatePieChartData(list)
 
-        updatePieChartData(list)
+                        val groupedList = list.groupBy { it.date }
+                        historyList.clear()
+                        for (key in groupedList.keys)
+                            historyList.add(
+                                HistoryGroupIVM(
+                                    Utilities.formatDate(key),
+                                    groupedList[key] ?: ArrayList()
+                                )
+                            )
+                        historyAdapter.notifyDataSetChanged()
+                    }
+                } else if (response.status == Resources.DataStatus.ERROR) {
+                    historyErrorMsg.set(
+                        response.error?.message ?: getString(R.string.something_went_wrong)
+                    )
+                }
+            }
 
-        val groupedList = list.groupBy { it.date }
-        historyList.clear()
-        for (key in groupedList.keys)
-            historyList.add(
-                HistoryGroupIVM(
-                    Utilities.dateFormatForDisplay(key),
-                    groupedList[key] ?: ArrayList()
-                )
-            )
-        historyAdapter.notifyDataSetChanged()
     }
 
     private fun getTopCurrenciesRates() {

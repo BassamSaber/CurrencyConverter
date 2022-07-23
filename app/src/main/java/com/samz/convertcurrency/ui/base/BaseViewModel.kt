@@ -24,6 +24,11 @@ abstract class BaseViewModel : ViewModel() {
         this.lifecycleOwner = lifecycleOwner
     }
 
+    fun onViewRecreated(context: Context, lifecycleOwner: LifecycleOwner) {
+        this.context = context
+        this.lifecycleOwner = lifecycleOwner
+    }
+
     var extrasData: Bundle? = null
 
     fun getString(resId: Int): String {

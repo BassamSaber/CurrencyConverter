@@ -37,7 +37,8 @@ abstract class BaseFragment<T : ViewDataBinding, V : BaseViewModel> : Fragment()
         if (!getViewModel().isViewAttached) {
             getViewModel().extrasData = arguments
             getViewModel().onViewCreated(requireContext(), viewLifecycleOwner)
-        }
+        } else
+            getViewModel().onViewRecreated(requireContext(), viewLifecycleOwner)
     }
 
 }
