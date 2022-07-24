@@ -208,5 +208,4 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun getString(resId: Int): String = resUtils.getString(resId)
-    private fun showErrorDialog(errorMsg: String?) = resUtils.showErrorDialog(errorMsg)
 }

@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.annotation.CallSuper
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.samz.convertcurrency.model.UIViewResourceLiveData
 import com.samz.convertcurrency.model.generalResponse.Resources
 import com.samz.convertcurrency.utils.ApiException
 import com.samz.convertcurrency.utils.NoInternetException
@@ -39,6 +40,12 @@ abstract class BaseViewModel : ViewModel() {
             }
             callback(data)
         }
+    }
+
+
+    val uiViewResourceLiveData = UIViewResourceLiveData()
+    fun showErrorDialog(errorMsg: String?) {
+        uiViewResourceLiveData.setValue(errorMsg)
     }
 
 }
